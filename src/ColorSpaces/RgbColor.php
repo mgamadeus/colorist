@@ -86,7 +86,8 @@ class RgbColor
      *
      * @return LabColor The color representation in the Lab color space.
      */
-    public function toLabColor(): LabColor {
+    public function toLabColor(): LabColor
+    {
         return $this->toXyzColor()->toLabColor();
     }
 
@@ -99,7 +100,8 @@ class RgbColor
      *
      * @return LchColor The color in LchColor representation.
      */
-    public function toLchColor(): LchColor {
+    public function toLchColor(): LchColor
+    {
         return $this->toLabColor()->toLchColor();
     }
 
@@ -118,7 +120,7 @@ class RgbColor
         $customPaletteLch = $closestGoldenPalette->createCustomPalette($lchColor);
 
         // Convert the custom palette from LCH back to RGB
-        $customPaletteRgb = array_map(function($lchColor) {
+        $customPaletteRgb = array_map(function ($lchColor) {
             return $lchColor->toLabColor()->toXyzColor()->toRgbColor();
         }, $customPaletteLch);
 
@@ -177,6 +179,23 @@ class RgbColor
     public function getRgbaHex(): string
     {
         return sprintf('#%02X%02X%02X%02X', (int)($this->red * 255), (int)($this->green * 255), (int)($this->blue * 255), (int)($this->alpha * 255));
+    }
+
+    /**
+     * Converts the object to a string representation.
+     *
+     * This method checks if the alpha value is 1 (fully opaque). If it is true, it uses the getRgbHex() method
+     * to return the RGB value as a hexadecimal string. If the alpha value is false, it uses the getRgbaHex() method
+     * to return the RGBA value as a hexadecimal string.
+     *
+     * @return string The string representation of the object.
+     */
+    public function __toString(): string
+    {
+        // Check if alpha value is 1 (fully opaque).
+        // If true, use getRgbHex() for RGB output.
+        // If false, use getRgbaHex() for RGBA output.
+        return $this->alpha == 1.0 ? $this->getRgbHex() : $this->getRgbaHex();
     }
 
     /**
