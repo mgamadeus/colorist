@@ -10,6 +10,8 @@ declare (strict_types=1);
 
 namespace Colorist\ColorSpaces;
 
+use Colorist\Palettes\Shades;
+
 /**
  * Class HslColor
  *
@@ -89,5 +91,15 @@ class HslColor
         $b += $m;
 
         return new RgbColor($r, $g, $b, $this->alpha);
+    }
+
+    /**
+     * Generates shades based on the current color.
+     *
+     * @return Shades The generated shades based on the current color.
+     */
+    public function generateShades(): Shades
+    {
+        return Shades::generateFromBase($this);
     }
 }

@@ -6,7 +6,7 @@
 
 - **Diverse Color Spaces**: Supports numerous color spaces such as RGB, HSL, XYZ, LAB, and LCH, catering to a broad spectrum of color operations and transformations.
 - **Seamless Interoperability**: Facilitates accurate and effortless conversion between color spaces, enabling complex color manipulations and analyses to fit specific requirements.
-- **Material Design-Inspired Palettes**: Generate harmonious and visually appealing color palettes using LCH color space, leveraging the logic found in Material Design guidelines. This feature is particularly beneficial for UI/UX design, branding, and thematic applications.
+- **Material Design-Inspired Palettes and Shades**: Generate harmonious and visually appealing color palettes and shades using LCH and HSL color spaces, leveraging the logic found in Material Design guidelines. This feature is particularly beneficial for UI/UX design, branding, thematic applications, and achieving desired color gradations.
 - **Customizable and Extensible**: Built to be easily extendable for incorporating additional color spaces and conversion methods, ensuring the library remains adaptable to evolving project needs and color science advancements.
 
 ## Utilizing Colorist
@@ -39,7 +39,30 @@ foreach ($palette as $color) {
 }
 ```
 
-This example demonstrates the library's ability to take a simple RGB color input and utilize it to produce a comprehensive and harmonious color palette, suitable for design projects that require a consistent and appealing color scheme.
+### Generating Material Design Shades from a Base Color
+
+With Colorist, you can also generate Material Design-inspired shades from any base color. This can be particularly useful for designing UI components that require multiple shades of a primary color:
+
+```php
+use Colorist\ColorSpaces\RgbColor;
+use Colorist\ColorSpaces\HslColor;
+
+// Create an RGB color from a hexadecimal code
+$rgbColor = RgbColor::fromHex('#3498db');
+
+// Convert the RGB color to HSL
+$hslColor = $rgbColor->toHslColor();
+
+// Generate Material Design shades from the HSL color
+$shades = HslColor::generateShades($hslColor);
+
+// Display the hexadecimal codes of the generated shades
+foreach ($shades as $shade) {
+    echo $shade->toHex() . PHP_EOL;
+}
+```
+
+This example demonstrates the library's capability to not only produce cohesive palettes but also specific shades that adhere to the Material Design guidelines, enhancing the versatility in color manipulation for your projects.
 
 ---
 

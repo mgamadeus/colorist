@@ -4,6 +4,7 @@ declare (strict_types=1);
 
 namespace Colorist\ColorSpaces;
 
+use Colorist\Palettes\Shades;
 use InvalidArgumentException;
 
 class RgbColor
@@ -164,7 +165,7 @@ class RgbColor
      */
     public function getRgbHex(): string
     {
-        return sprintf('#%02X%02X%02X', (int)($this->red * 255), (int)($this->green * 255), (int)($this->blue * 255));
+        return sprintf('#%02X%02X%02X', $this->red, $this->green, $this->blue);
     }
 
     /**
@@ -178,7 +179,7 @@ class RgbColor
      */
     public function getRgbaHex(): string
     {
-        return sprintf('#%02X%02X%02X%02X', (int)($this->red * 255), (int)($this->green * 255), (int)($this->blue * 255), (int)($this->alpha * 255));
+        return sprintf('#%02X%02X%02X%02X', $this->red, $this->green, $this->blue, round($this->alpha * 255));
     }
 
     /**
@@ -209,7 +210,21 @@ class RgbColor
      */
     public function getArgbHex(): string
     {
-        return sprintf('#%02X%02X%02X%02X', (int)($this->alpha * 255), (int)($this->red * 255), (int)($this->green * 255), (int)($this->blue * 255));
+        return sprintf('#%02X%02X%02X%02X', (int)($this->alpha * 255), $this->red, $this->green, $this->blue);
+    }
+
+    /**
+     * Returns the CSS rgba() representation of the color.
+     *
+     * This method constructs a string suitable for CSS usage, representing the color in the rgba() format.
+     * It uses the red, green, and blue components directly and formats the alpha value as a decimal between 0 and 1,
+     * conforming to the CSS color specification.
+     *
+     * @return string The CSS rgba() color representation.
+     */
+    public function getCssRgba(): string
+    {
+        return sprintf('rgba(%d, %d, %d, %.2f)', $this->red, $this->green, $this->blue, $this->alpha);
     }
 
     /**
@@ -255,5 +270,19 @@ class RgbColor
         $a = hexdec(substr($hex, 6, 2)) / 255;
 
         return new self($r, $g, $b, $a);
+    }
+
+    /**
+     * Generates shades of the color.
+     *
+     * This method converts the color to HSL format using the toHslColor() method,
+     * and then generates shades of the color using the generateShades() method of the HSL color.
+     * The generated shades are returned as a Shades object.
+     *
+     * @return Shades The shades of the color.
+     */
+    public function generateShades(): Shades
+    {
+        return $this->toHslColor()->generateShades();
     }
 }
