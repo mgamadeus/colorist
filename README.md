@@ -22,24 +22,20 @@ Within **Colorist**, each color space is represented by a dedicated class, equip
 
 ### Generating a Palette from an RGB Color
 
-**Colorist** excels in generating cohesive color palettes from a base color. Here’s a quick example of how to transform an RGB color from a hexadecimal code into an LCH color and create a custom palette:
+Colorist simplifies the creation of harmonious color palettes from a single base color, drawing on Material Design principles for cohesiveness and aesthetic appeal. Here's how to generate a color palette directly from an RGB color represented in hexadecimal format:
 
 ```php
 use Colorist\ColorSpaces\RgbColor;
-use Colorist\ColorSpaces\LchColor;
 
 // Create an RGB color from a hexadecimal code
 $rgbColor = RgbColor::fromHex('#3498db');
 
-// Convert the RGB color to an LCH color
-$lchColor = $rgbColor->toLchColor();
+// Directly generate a palette based on the RGB color
+$palette = $rgbColor->createPalette();
 
-// Generate a palette based on the LCH color
-$palette = $lchColor->createPalette();
-
-// Display the generated palette colors
+// Display the hexadecimal codes of the generated palette colors
 foreach ($palette as $color) {
-    echo $color->toHex() . PHP_EOL;
+    echo $color->getRgbHex() . PHP_EOL;
 }
 ```
 

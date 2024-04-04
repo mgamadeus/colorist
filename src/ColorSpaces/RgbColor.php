@@ -79,6 +79,63 @@ class RgbColor
         return new HslColor((int)$hue, $saturation, $lightness, $this->alpha);
     }
 
+    /**
+     * Converts the color to the Lab color space.
+     *
+     * This method converts the color from its current color space to the Lab color space.
+     *
+     * @return LabColor The color representation in the Lab color space.
+     */
+    public function toLabColor(): LabColor {
+        return $this->toXyzColor()->toLabColor();
+    }
+
+    /**
+     * Converts the color to LchColor representation.
+     *
+     * The method converts the current color to LchColor representation.
+     * It first converts the color to LabColor representation using the toLabColor() method,
+     * then converts the LabColor to LchColor using the toLchColor() method.
+     *
+     * @return LchColor The color in LchColor representation.
+     */
+    public function toLchColor(): LchColor {
+        return $this->toLabColor()->toLchColor();
+    }
+
+    /**
+     * Creates a color palette based on the current RGB color.
+     *
+     * @return RgbColor[] Returns an array of RgbColor objects representing the palette.
+     */
+    public function createPalette(): array
+    {
+        // Convert RGB to LCH
+        $lchColor = $this->toLchColor();
+
+        // Get the closest golden palette and create a custom palette based on the LCH color
+        $closestGoldenPalette = $lchColor->getClosestGoldenPalette();
+        $customPaletteLch = $closestGoldenPalette->createCustomPalette($lchColor);
+
+        // Convert the custom palette from LCH back to RGB
+        $customPaletteRgb = array_map(function($lchColor) {
+            return $lchColor->toLabColor()->toXyzColor()->toRgbColor();
+        }, $customPaletteLch);
+
+        return $customPaletteRgb;
+    }
+
+    /**
+     * Converts the RGB color to the XYZ color space.
+     *
+     * The method calculates the XYZ color coordinates of the RGB color based on the defined formulas.
+     * It performs gamma correction on the red, green, and blue components of the color and then calculates
+     * the X, Y, and Z coordinates using the specified formulas: X = 0.4124564 * R + 0.3575761 * G + 0.1804375 * B,
+     * Y = 0.2126729 * R + 0.7151522 * G + 0.0721750 * B, Z = 0.0193339 * R + 0.1191920 * G + 0.9503041 * B.
+     * The resulting XYZ color is then encapsulated in an instance of the XyzColor class with the same alpha value.
+     *
+     * @return XyzColor The XYZ representation of the RGB color.
+     */
     public function toXyzColor(): XyzColor
     {
         $r = $this->correctGamma($this->red);
