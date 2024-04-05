@@ -232,6 +232,25 @@ class RgbColor
     }
 
     /**
+     * Creates an RgbColor instance from a CSS rgba color string.
+     *
+     * @param string $cssRgba The CSS rgba color string (e.g., "rgba(255, 99, 71, 0.5)").
+     * @return RgbColor The new RgbColor instance.
+     */
+    public static function fromCssRgba(string $cssRgba): RgbColor {
+        if (preg_match('/^rgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(0|1|0?\.\d+))?\)$/', $cssRgba, $matches)) {
+            $red = (int)$matches[1];
+            $green = (int)$matches[2];
+            $blue = (int)$matches[3];
+            $alpha = isset($matches[5]) ? (float)$matches[5] : 1.0; // Standardmäßig vollständig opak, wenn kein Alpha-Wert angegeben ist
+
+            return new self($red / 255, $green / 255, $blue / 255, $alpha);
+        } else {
+            throw new InvalidArgumentException("The provided CSS rgba string '{$cssRgba}' is in an unrecognized format.");
+        }
+    }
+
+    /**
      * Corrects the gamma value of the given input value.
      *
      * This method corrects the gamma value of the input value based on the following formula:
