@@ -19,12 +19,12 @@ use Colorist\Palettes\Shades;
  */
 class HslColor
 {
-    protected int $hue;
+    protected float $hue;
     protected float $saturation;
     protected float $lightness;
     protected float $alpha;
 
-    public function __construct(int $hue, float $saturation, float $lightness, float $alpha = 1.0)
+    public function __construct(float $hue, float $saturation, float $lightness, float $alpha = 1.0)
     {
         $this->hue = $hue;
         $this->saturation = $saturation;
@@ -32,7 +32,7 @@ class HslColor
         $this->alpha = $alpha;
     }
 
-    public function getHue(): int
+    public function getHue(): float
     {
         return $this->hue;
     }
@@ -55,43 +55,41 @@ class HslColor
     /**
      * Converts the current color to an RGB color.
      *
-     * @return RgbColor The RGB color representation of the current color.
+     * This method applies HSL to RGB conversion formulas to convert the current HSL color
+     * values to the RGB color space, considering the alpha value. The resulting RGB values
+     * are in the range of 0 to 1, suitable for consistent digital color representation across
+     * various systems that use floating-point numbers for color values.
+     *
+     * @return RgbColor The RGB color representation of the current HSL color.
      */
     public function toRgbColor(): RgbColor
     {
-        $chroma = (1 - abs(2 * $this->lightness - 1)) * $this->saturation;
-        $huePrime = $this->hue / 60.0;
-        $x = $chroma * (1 - abs(fmod($huePrime, 2) - 1));
-        $m = $this->lightness - $chroma / 2;
+        if ($this->saturation == 0) {
+            // Achromatic color (gray scale)
+            return new RgbColor($this->lightness, $this->lightness, $this->lightness, $this->alpha);
+        } else {
+            $functionHueToRgb = function ($p, $q, $t) {
+                if ($t < 0) $t += 1;
+                if ($t > 1) $t -= 1;
+                if ($t < 1/6) return $p + ($q - $p) * 6 * $t;
+                if ($t < 1/2) return $q;
+                if ($t < 2/3) return $p + ($q - $p) * (2/3 - $t) * 6;
+                return $p;
+            };
 
-        $r = $g = $b = 0;
+            $q = $this->lightness < 0.5 ? $this->lightness * (1 + $this->saturation) : $this->lightness + $this->saturation - $this->lightness * $this->saturation;
+            $p = 2 * $this->lightness - $q;
 
-        if ($huePrime < 1.0) {
-            $r = $chroma;
-            $g = $x;
-        } elseif ($huePrime < 2.0) {
-            $r = $x;
-            $g = $chroma;
-        } elseif ($huePrime < 3.0) {
-            $g = $chroma;
-            $b = $x;
-        } elseif ($huePrime < 4.0) {
-            $g = $x;
-            $b = $chroma;
-        } elseif ($huePrime < 5.0) {
-            $r = $x;
-            $b = $chroma;
-        } elseif ($huePrime <= 6.0) {
-            $r = $chroma;
-            $b = $x;
+            $r = $functionHueToRgb($p, $q, $this->hue + 1/3);
+            $g = $functionHueToRgb($p, $q, $this->hue);
+            $b = $functionHueToRgb($p, $q, $this->hue - 1/3);
         }
 
-        $r += $m;
-        $g += $m;
-        $b += $m;
-
+        // The RGB values are already in the correct 0-1 range
         return new RgbColor($r, $g, $b, $this->alpha);
     }
+
+
 
     /**
      * Generates shades based on the current color.

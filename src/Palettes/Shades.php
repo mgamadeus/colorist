@@ -59,7 +59,7 @@ class Shades
         foreach (self::DEFAULT_SHADES as $grade => $lightnessAdjustment) {
             $newLightness = $baseColor->getLightness() + ($lightnessAdjustment - $baseColor->getLightness()) * ((int)$grade / 100.0);
             $shadeColor = new HslColor($baseColor->getHue(), $baseColor->getSaturation(), $newLightness, $baseColor->getAlpha());
-            $instance->addShade(new Shade($shadeColor, $grade));
+            $instance->addShade(new Shade($shadeColor, (string) $grade));
         }
         return $instance;
     }

@@ -60,8 +60,7 @@ class XyzColor {
      *
      * This method applies reverse gamma correction formula to convert the current color to RGB color.
      * The reverseGammaCorrection function is used to calculate the RGB values for each component.
-     * It then scales these values to the 0-255 range suitable for the RgbColor constructor and ensures
-     * they are integers.
+     * It ensures these values are within the 0-1 range suitable for the RgbColor constructor.
      *
      * @return RgbColor The RGB representation of the current color.
      */
@@ -74,21 +73,19 @@ class XyzColor {
             }
         };
 
-        // Convert XYZ to linear RGB in the range 0-1
-        $r = $reverseGammaCorrection(3.2404542 * $this->x + -1.5371385 * $this->y + -0.4985314 * $this->z);
-        $g = $reverseGammaCorrection(-0.9692660 * $this->x + 1.8760108 * $this->y + 0.0415560 * $this->z);
-        $b = $reverseGammaCorrection(0.0556434 * $this->x + -0.2040259 * $this->y + 1.0572252 * $this->z);
+        // XYZ to linear RGB conversion constants are applied directly.
+        // No need for scaling or rounding, as we're working in the 0-1 range.
+        $rLinear = 3.2404542 * $this->x - 1.5371385 * $this->y - 0.4985314 * $this->z;
+        $gLinear = -0.9692660 * $this->x + 1.8760108 * $this->y + 0.0415560 * $this->z;
+        $bLinear = 0.0556434 * $this->x - 0.2040259 * $this->y + 1.0572252 * $this->z;
 
-        // Scale the values to the range 0-255 and round to integers
-        $r = round($r * 255);
-        $g = round($g * 255);
-        $b = round($b * 255);
+        // Apply reverse gamma correction to each component.
+        $r = $reverseGammaCorrection($rLinear);
+        $g = $reverseGammaCorrection($gLinear);
+        $b = $reverseGammaCorrection($bLinear);
 
-        // Ensure values are clamped to the range 0-255
-        $r = min(255, max(0, $r));
-        $g = min(255, max(0, $g));
-        $b = min(255, max(0, $b));
-
-        return new RgbColor((int)$r, (int)$g, (int)$b, $this->alpha);
+        // Return the new RgbColor with components in the range 0-1.
+        return new RgbColor($r, $g, $b, $this->alpha);
     }
+
 }

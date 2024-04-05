@@ -9,30 +9,35 @@ use InvalidArgumentException;
 
 class RgbColor
 {
-    protected int $red;
-    protected int $green;
-    protected int $blue;
+    protected float $red;
+    protected float $green;
+    protected float $blue;
     protected float $alpha;
 
-    public function __construct(int $red, int $green, int $blue, float $alpha = 1.0)
+    public function __construct(float $red, float $green, float $blue, float $alpha = 1.0)
     {
-        $this->red = $red;
-        $this->green = $green;
-        $this->blue = $blue;
-        $this->alpha = $alpha;
+        $this->red = $this->clamp($red);
+        $this->green = $this->clamp($green);
+        $this->blue = $this->clamp($blue);
+        $this->alpha = $this->clamp($alpha);
     }
 
-    public function getRed(): int
+    private function clamp(float $value): float
+    {
+        return max(0.0, min($value, 1.0));
+    }
+
+    public function getRed(): float
     {
         return $this->red;
     }
 
-    public function getGreen(): int
+    public function getGreen(): float
     {
         return $this->green;
     }
 
-    public function getBlue(): int
+    public function getBlue(): float
     {
         return $this->blue;
     }
@@ -43,12 +48,22 @@ class RgbColor
     }
 
     /**
-     * Converts the RGB color to HSL color representation.
+     * Creates an RgbColor instance from RGBA values.
      *
-     * This method calculates and returns the HSL color representation of the RGB color.
-     * The HSL color model represents color based on its hue, saturation, and lightness components.
-     * The hue value represents the color itself, saturation represents the purity of the color, and
-     * lightness represents the brightness of the color.
+     * @param int $red The red component (0-255).
+     * @param int $green The green component (0-255).
+     * @param int $blue The blue component (0-255).
+     * @param float $alpha The alpha component (0.0-1.0).
+     * @return RgbColor The new RgbColor instance.
+     */
+    public static function fromRgba(int $red, int $green, int $blue, float $alpha): RgbColor
+    {
+        return new self($red / 255, $green / 255, $blue / 255, $alpha);
+    }
+
+
+    /**
+     * Converts the RGB color to HSL color representation.
      *
      * @return HslColor The HSL color representation of the RGB color.
      */
@@ -61,23 +76,20 @@ class RgbColor
         $hue = 0;
         if ($delta != 0) {
             if ($max == $this->red) {
-                $hue = 60 * (($this->green - $this->blue) / $delta);
+                $hue = 60 * fmod((($this->green - $this->blue) / $delta), 6);
             } elseif ($max == $this->green) {
                 $hue = 60 * (($this->blue - $this->red) / $delta + 2);
             } elseif ($max == $this->blue) {
                 $hue = 60 * (($this->red - $this->green) / $delta + 4);
             }
         }
-        $hue = fmod(($hue + 360), 360);
 
-        $saturation = 0;
-        if (!($max == 0 || $min == 1)) {
-            $saturation = $delta / (1 - abs($max + $min - 1));
-        }
-
+        $hue = fmod(($hue + 360), 360); // Ensure hue is between 0-360 degrees
         $lightness = ($max + $min) / 2;
+        $saturation = $delta == 0 ? 0 : $delta / (1 - abs(2 * $lightness - 1));
 
-        return new HslColor((int)$hue, $saturation, $lightness, $this->alpha);
+        // The HSL components are now floating-point values
+        return new HslColor($hue, $saturation, $lightness, $this->alpha);
     }
 
     /**
@@ -165,7 +177,7 @@ class RgbColor
      */
     public function getRgbHex(): string
     {
-        return sprintf('#%02X%02X%02X', $this->red, $this->green, $this->blue);
+        return sprintf('#%02X%02X%02X', round($this->red * 255), round($this->green * 255), round($this->blue * 255));
     }
 
     /**
@@ -179,7 +191,7 @@ class RgbColor
      */
     public function getRgbaHex(): string
     {
-        return sprintf('#%02X%02X%02X%02X', $this->red, $this->green, $this->blue, round($this->alpha * 255));
+        return sprintf('#%02X%02X%02X%02X', round($this->red * 255), round($this->green * 255), round($this->blue * 255), round($this->alpha * 255));
     }
 
     /**
@@ -210,8 +222,9 @@ class RgbColor
      */
     public function getArgbHex(): string
     {
-        return sprintf('#%02X%02X%02X%02X', (int)($this->alpha * 255), $this->red, $this->green, $this->blue);
+        return sprintf('#%02X%02X%02X%02X', round($this->alpha * 255), round($this->red * 255), round($this->green * 255), round($this->blue * 255));
     }
+
 
     /**
      * Returns the CSS rgba() representation of the color.
@@ -224,7 +237,10 @@ class RgbColor
      */
     public function getCssRgba(): string
     {
-        return sprintf('rgba(%d, %d, %d, %.2f)', $this->red, $this->green, $this->blue, $this->alpha);
+        $r = round($this->red * 255);
+        $g = round($this->green * 255);
+        $b = round($this->blue * 255);
+        return sprintf('rgba(%d, %d, %d, %.2f)', $r, $g, $b, $this->alpha);
     }
 
     /**
@@ -264,13 +280,15 @@ class RgbColor
             throw new InvalidArgumentException('Hex color must be 6 or 8 characters long.');
         }
 
-        $r = hexdec(substr($hex, 0, 2));
-        $g = hexdec(substr($hex, 2, 2));
-        $b = hexdec(substr($hex, 4, 2));
-        $a = hexdec(substr($hex, 6, 2)) / 255;
+        // Convert hex values to decimal and normalize to [0, 1]
+        $r = hexdec(substr($hex, 0, 2)) / 255.0;
+        $g = hexdec(substr($hex, 2, 2)) / 255.0;
+        $b = hexdec(substr($hex, 4, 2)) / 255.0;
+        $a = hexdec(substr($hex, 6, 2)) / 255.0;
 
         return new self($r, $g, $b, $a);
     }
+
 
     /**
      * Generates shades of the color.
