@@ -30,37 +30,13 @@ use Colorist\ColorSpaces\RgbColor;
 // Create an RGB color from a hexadecimal code
 $rgbColor = RgbColor::fromHex('#3498db');
 
-// Directly generate a palette based on the RGB color
-$palette = $rgbColor->createPalette();
+// Directly generate Shades based on the RGB color
+$shades = $rgbColor->createShades();
 
 // Display the hexadecimal codes of the generated palette colors
-foreach ($palette as $color) {
-    echo $color->getRgbHex() . PHP_EOL;
+foreach ($shades->getShades() as $shade) {
+    echo $shade->getColor()->getRgbHex() . PHP_EOL;
 }
-```
-
-### Generating Material Design Shades from a Base Color
-
-With Colorist, you can also generate Material Design-inspired shades from any base color. This can be particularly useful for designing UI components that require multiple shades of a primary color:
-
-```php
-use Colorist\ColorSpaces\RgbColor;
-use Colorist\ColorSpaces\HslColor;
-
-// Create an RGB color from a hexadecimal code
-$rgbColor = RgbColor::fromHex('#3498db');
-
-// Convert the RGB color to HSL
-$hslColor = $rgbColor->toHslColor();
-
-// Generate Material Design shades from the HSL color
-$shades = HslColor::generateShades($hslColor);
-
-// Display the hexadecimal codes of the generated shades
-foreach ($shades as $shade) {
-    echo $shade->toHex() . PHP_EOL;
-}
-```
 
 This example demonstrates the library's capability to not only produce cohesive palettes but also specific shades that adhere to the Material Design guidelines, enhancing the versatility in color manipulation for your projects.
 

@@ -119,25 +119,13 @@ class RgbColor
     }
 
     /**
-     * Creates a color palette based on the current RGB color.
+     * Converts the RGB color of an object to LCH color and creates custom shades based on the LCH color.
      *
-     * @return RgbColor[] Returns an array of RgbColor objects representing the palette.
+     * @return Shades The custom shades created based on the LCH color of the RGB color.
      */
-    public function createPalette(): array
+    public function createShades(): Shades
     {
-        // Convert RGB to LCH
-        $lchColor = $this->toLchColor();
-
-        // Get the closest golden palette and create a custom palette based on the LCH color
-        $closestGoldenPalette = $lchColor->getClosestGoldenPalette();
-        $customPaletteLch = $closestGoldenPalette->createCustomPalette($lchColor);
-
-        // Convert the custom palette from LCH back to RGB
-        $customPaletteRgb = array_map(function ($lchColor) {
-            return $lchColor->toLabColor()->toXyzColor()->toRgbColor();
-        }, $customPaletteLch);
-
-        return $customPaletteRgb;
+        return $this->toLchColor()->createShades();
     }
 
     /**

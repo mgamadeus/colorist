@@ -5,24 +5,25 @@ declare (strict_types=1);
 namespace Colorist\Palettes;
 
 use Colorist\ColorSpaces\HslColor;
+use Colorist\ColorSpaces\RgbColor;
 
 class Shade
 {
-    protected HslColor $color;
+    protected RgbColor $color;
     protected string $grade;
 
-    public function __construct(HslColor $color, string $grade)
+    public function __construct(RgbColor $color, string $grade)
     {
         $this->color = $color;
         $this->grade = $grade;
     }
 
-    public function getColor(): HslColor
+    public function getColor(): RgbColor
     {
         return $this->color;
     }
 
-    public function setColor(HslColor $color): void
+    public function setColor(RgbColor $color): void
     {
         $this->color = $color;
     }

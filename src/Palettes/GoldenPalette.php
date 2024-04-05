@@ -356,9 +356,9 @@ class GoldenPalette
      * applying specific lightness and chroma adjustments.
      *
      * @param LchColor $customBaseColor The base color to adjust the palette around.
-     * @return LchColor[] An array of adjusted LchColor objects forming the custom palette.
+     * @return Shades An array of adjusted LchColor objects forming the custom palette.
      */
-    public function createCustomPalette(LchColor $customBaseColor): array
+    public function createCustomShades(LchColor $customBaseColor): Shades
     {
         $customBaseColorLab = $customBaseColor->toLabColor();
         $maxLightness = 100.0;
@@ -367,7 +367,7 @@ class GoldenPalette
         $colorDifference = $closestGoldenPaletteColor->subtract($customBaseColor);
         //$colorDifference = $customBaseColor->subtract($closestGoldenPaletteColor);
 
-        $adjustedPalette = [];
+        $shades = new Shades();
         foreach ($this->colors as $index => $goldenPaletteColor) {
             if ($goldenPaletteColor === $closestGoldenPaletteColor) {
                 $adjustedBaseColor = $customBaseColor;
@@ -400,9 +400,9 @@ class GoldenPalette
             }
             // Coerce lightness within the new maximum lightness limit
             $maxLightness = max(0.0, $adjustedBaseColor->getLightness() - 1.7);
-            $adjustedPalette[] = $adjustedBaseColor;
+            $shades->addShade(new Shade($adjustedBaseColor->toLabColor()->toXyzColor()->toRgbColor(), Shades::DEFAULT_SHADES[$index]));
         }
 
-        return $adjustedPalette;
+        return $shades;
     }
 }

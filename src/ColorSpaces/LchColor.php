@@ -5,6 +5,7 @@ declare (strict_types=1);
 namespace Colorist\ColorSpaces;
 
 use Colorist\Palettes\GoldenPalette;
+use Colorist\Palettes\Shades;
 
 class LchColor
 {
@@ -213,14 +214,14 @@ class LchColor
     }
 
     /**
-     * Creates a custom palette based on this color.
+     * Creates shades using the closest golden palette.
      *
-     * @return LchColor[] An array of LchColor objects representing the custom palette.
+     * @return Shades The shades created using the closest golden palette.
      */
-    public function createPalette(): array
+    public function createShades(): Shades
     {
         $closestGoldenPalette = $this->getClosestGoldenPalette();
-        return $closestGoldenPalette->createCustomPalette($this);
+        return $closestGoldenPalette->createCustomShades($this);
     }
 
 }
