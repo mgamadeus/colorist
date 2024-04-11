@@ -1,12 +1,12 @@
 # Colorist: A PHP Color Space Transformation Library
 
-**Colorist** is a PHP library developed for sophisticated manipulation and conversion among various color spaces, drawing inspiration from the principles of Material Design for generating color palettes. It offers a versatile suite of functionalities for developers, designers, and artists to work with colors in a wide array of applications, from web design to digital art and beyond.
+**Colorist** is a PHP library developed for sophisticated manipulation and conversion among various color spaces and generation of Material Design Shades.
 
 ## Key Features
 
 - **Diverse Color Spaces**: Supports numerous color spaces such as RGB, HSL, XYZ, LAB, and LCH, catering to a broad spectrum of color operations and transformations.
 - **Seamless Interoperability**: Facilitates accurate and effortless conversion between color spaces, enabling complex color manipulations and analyses to fit specific requirements.
-- **Material Design-Inspired Palettes and Shades**: Generate harmonious and visually appealing color palettes and shades using LCH and HSL color spaces, leveraging the logic found in Material Design guidelines. This feature is particularly beneficial for UI/UX design, branding, thematic applications, and achieving desired color gradations.
+- **Material Design-Inspired Palettes and Shades**: Generate harmonious and visually appealing color palettes and shades using LCH and HSL color spaces, leveraging the logic found in Material Design guidelines. This feature is particularly beneficial for UI/UX design, branding, thematic applications, and achieving desired color gradations. * Attention *: The Package uses the same algorithm as material design for shade generation, but generated shades can differ in color code but are visibly unnoticable. The reason behind is that the material design JS initially converts the color from RGB to another color space and back without any reason and by this creates inaccuracies that Colorist does not have. 
 - **Customizable and Extensible**: Built to be easily extendable for incorporating additional color spaces and conversion methods, ensuring the library remains adaptable to evolving project needs and color science advancements.
 
 ## Utilizing Colorist

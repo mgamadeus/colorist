@@ -47,6 +47,26 @@ class RgbColor
         return $this->alpha;
     }
 
+    public function setRed(float $red): void
+    {
+        $this->red = $this->clamp($red);
+    }
+
+    public function setGreen(float $green): void
+    {
+        $this->green = $this->clamp($green);
+    }
+
+    public function setBlue(float $blue): void
+    {
+        $this->blue = $this->clamp($blue);
+    }
+
+    public function setAlpha(float $alpha): void
+    {
+        $this->alpha = $this->clamp($alpha);
+    }
+
     /**
      * Creates an RgbColor instance from RGBA values.
      *
@@ -232,13 +252,27 @@ class RgbColor
     }
 
     /**
+     * Returns the hexadecimal representation of the color including the alpha channel.
+     *
+     * This method returns a string representing the color in CSS-compatible hexadecimal format with alpha channel.
+     * The format is as follows: #RRGGBBAA, where RR, GG, BB are two-digit hexadecimal values for the red, green,
+     * and blue color components, and AA represents the alpha component.
+     *
+     * @return string The CSS-compatible hexadecimal representation including the alpha channel.
+     */
+    public function getCssHexA(): string
+    {
+        return sprintf('#%02X%02X%02X%02X', round($this->red * 255), round($this->green * 255), round($this->blue * 255), round($this->alpha * 255));
+    }
+
+    /**
      * Creates an RgbColor instance from a CSS rgba color string.
      *
      * @param string $cssRgba The CSS rgba color string (e.g., "rgba(255, 99, 71, 0.5)").
      * @return RgbColor The new RgbColor instance.
      */
     public static function fromCssRgba(string $cssRgba): RgbColor {
-        if (preg_match('/^rgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(0|1|0?\.\d+))?\)$/', $cssRgba, $matches)) {
+        if (preg_match('/^rgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(0|1|0?\.\d+|1\.\d+))?\)$/', $cssRgba, $matches)) {
             $red = (int)$matches[1];
             $green = (int)$matches[2];
             $blue = (int)$matches[3];
@@ -248,6 +282,25 @@ class RgbColor
         } else {
             throw new InvalidArgumentException("The provided CSS rgba string '{$cssRgba}' is in an unrecognized format.");
         }
+    }
+
+    /**
+     * Converts a RGB or hexadecimal color string to an RGB color object.
+     *
+     * @param string $rgbOrHexColor The RGB or hexadecimal color string to convert.
+     * @return static|null The RGB color object representing the converted color string, or null if the conversion failed.
+     */
+    public static function fromString(string $rgbOrHexColor): ?static
+    {
+        $rgbColor = null;
+        if (preg_match('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{8})$/', $rgbOrHexColor)) {
+            // Create RgbColor instance from a HEX color string
+            $rgbColor = RgbColor::fromHex($rgbOrHexColor);
+        } // Check if the color string is in RGBA format
+        elseif (preg_match('/rgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),?\s*([\d\.]+)?\)/', $rgbOrHexColor, $matches)) {
+            $rgbColor = RgbColor::fromCssRgba($rgbOrHexColor);
+        }
+        return $rgbColor;
     }
 
     /**
