@@ -1,4 +1,4 @@
-# Colorist: A PHP Color Space Transformation Library
+# Colorist: A PHP Color Space Transformation Library & Material Design shades generator
 
 **Colorist** is a PHP library developed for sophisticated manipulation and conversion among various color spaces and generation of Material Design Shades.
 
