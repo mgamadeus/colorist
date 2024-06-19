@@ -348,19 +348,4 @@ class RgbColor
 
         return new self($r, $g, $b, $a);
     }
-
-
-    /**
-     * Generates shades of the color.
-     *
-     * This method converts the color to HSL format using the toHslColor() method,
-     * and then generates shades of the color using the generateShades() method of the HSL color.
-     * The generated shades are returned as a Shades object.
-     *
-     * @return Shades The shades of the color.
-     */
-    public function generateShades(): Shades
-    {
-        return $this->toHslColor()->generateShades();
-    }
 }

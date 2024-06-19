@@ -96,8 +96,8 @@ class HslColor
      *
      * @return Shades The generated shades based on the current color.
      */
-    public function generateShades(): Shades
+    public function createShades(): Shades
     {
-        return Shades::generateFromBase($this);
+        return $this->toRgbColor()->createShades();
     }
 }
