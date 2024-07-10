@@ -26,7 +26,7 @@ class Shades
     /**
      * @var Shade[]
      */
-    private array $shades = [];
+    protected array $shades = [];
 
     public function addShade(Shade $shade)
     {

@@ -85,4 +85,26 @@ class LabColor
 
         return new XyzColor($x, $y, $z, $this->alpha);
     }
+
+    public function __toString(): string
+    {
+        return sprintf(
+            'Lab(%f, %f, %f, %f)',
+            $this->lightness,
+            $this->a,
+            $this->b,
+            $this->alpha
+        );
+    }
+
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'lightness' => $this->lightness,
+            'a' => $this->a,
+            'b' => $this->b,
+            'alpha' => $this->alpha,
+        ];
+    }
 }

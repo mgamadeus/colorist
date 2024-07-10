@@ -348,4 +348,14 @@ class RgbColor
 
         return new self($r, $g, $b, $a);
     }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'red' => $this->red,
+            'green' => $this->green,
+            'blue' => $this->blue,
+            'alpha' => $this->alpha,
+        ];
+    }
 }

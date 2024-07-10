@@ -88,4 +88,24 @@ class XyzColor {
         return new RgbColor($r, $g, $b, $this->alpha);
     }
 
+    public function __toString(): string
+    {
+        return sprintf(
+            'XYZ(%f, %f, %f, %f)',
+            $this->x,
+            $this->y,
+            $this->z,
+            $this->alpha
+        );
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'x' => $this->x,
+            'y' => $this->y,
+            'z' => $this->z,
+            'alpha' => $this->alpha,
+        ];
+    }
 }

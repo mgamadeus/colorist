@@ -90,7 +90,6 @@ class HslColor
     }
 
 
-
     /**
      * Generates shades based on the current color.
      *
@@ -99,5 +98,26 @@ class HslColor
     public function createShades(): Shades
     {
         return $this->toRgbColor()->createShades();
+    }
+
+    public function __toString(): string
+    {
+        return sprintf(
+            'HSL(%f, %f, %f, %f)',
+            $this->hue,
+            $this->saturation,
+            $this->lightness,
+            $this->alpha
+        );
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'hue' => $this->hue,
+            'saturation' => $this->saturation,
+            'lightness' => $this->lightness,
+            'alpha' => $this->alpha,
+        ];
     }
 }

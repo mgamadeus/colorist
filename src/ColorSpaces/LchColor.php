@@ -224,4 +224,42 @@ class LchColor
         return $closestGoldenPalette->createCustomShades($this);
     }
 
+    /**
+     * Determines if the color is dark.
+     *
+     * @return bool True if the color is dark, false otherwise.
+     */
+    public function isDark():bool {
+        return $this->getLightness() < 50;
+    }
+
+    /**
+     * Checks if this color allows white text on its background.
+     *
+     * @return bool True if this color allows white text on its background, false otherwise.
+     */
+    public function allowsDarkTextOnBackgroundOfThisColor():bool {
+        return $this->getLightness() > 75;
+    }
+
+    public function __toString(): string
+    {
+        return sprintf(
+            'LCH(%f, %f, %f, %f)',
+            $this->lightness,
+            $this->chroma,
+            $this->hue,
+            $this->alpha
+        );
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'lightness' => $this->lightness,
+            'chroma' => $this->chroma,
+            'hue' => $this->hue,
+            'alpha' => $this->alpha,
+        ];
+    }
 }
