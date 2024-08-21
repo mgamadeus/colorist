@@ -69,6 +69,70 @@ class LchColor
     }
 
     /**
+     * Adds one LchColor to another.
+     * @param LchColor $other
+     * @return LchColor
+     */
+    public function add(LchColor $other): LchColor
+    {
+        return new LchColor(
+            $this->lightness + $other->getLightness(),
+            $this->chroma + $other->getChroma(),
+            $this->hue + $other->getHue(),
+            $this->alpha // Assuming alpha remains the same.
+        );
+    }
+
+    /**
+     * Blends this LchColor with another LchColor based on a specified blending factor.
+     *
+     * The blending is done in the LCH color space, which takes into account human perception of colors.
+     * A blending factor of 0.0 returns the original color (`$this`), 1.0 returns the other color (`$other`),
+     * and any value in between will return a color that is a weighted blend of the two.
+     *
+     * @param LchColor $other The other LchColor to blend with this color.
+     * @param float $blendingFactor A value between 0.0 and 1.0 that determines the weight of the blend.
+     *                               0.0 returns this color, 1.0 returns the other color, and values in between
+     *                               produce a weighted blend.
+     * @return LchColor The resulting LchColor after blending.
+     */
+    public function blendColor(LchColor $other, float $blendingFactor = 0.5): LchColor
+    {
+        // Ensure the blending factor is within the range [0, 1]
+        $blendingFactor = max(0.0, min(1.0, $blendingFactor));
+
+        // Interpolate lightness
+        $interpolatedLightness = $this->lightness + $blendingFactor * ($other->getLightness() - $this->lightness);
+
+        // Interpolate chroma
+        $interpolatedChroma = $this->chroma + $blendingFactor * ($other->getChroma() - $this->chroma);
+
+        // Interpolate hue, handling the circular nature of hue
+        $hueA = $this->hue;
+        $hueB = $other->getHue();
+        $deltaHue = $hueB - $hueA;
+
+        if ($deltaHue > 180.0) {
+            $deltaHue -= 360.0;
+        } elseif ($deltaHue < -180.0) {
+            $deltaHue += 360.0;
+        }
+
+        $interpolatedHue = $hueA + $blendingFactor * $deltaHue;
+
+        // Wrap hue into the range [0, 360]
+        if ($interpolatedHue < 0.0) {
+            $interpolatedHue += 360.0;
+        } elseif ($interpolatedHue >= 360.0) {
+            $interpolatedHue -= 360.0;
+        }
+
+        // Return the new interpolated color
+        return new LchColor($interpolatedLightness, $interpolatedChroma, $interpolatedHue, $this->alpha);
+    }
+
+
+    /**
      * Adjusts the lightness.
      * @param callable $callback
      * @return LchColor
@@ -215,13 +279,13 @@ class LchColor
 
     /**
      * Creates shades using the closest golden palette.
-     *
+     * @param bool $setCustomBaseColorAsShade500 If true, the custom base color will be set as the shade 500 color, even if it is dark
      * @return Shades The shades created using the closest golden palette.
      */
-    public function createShades(): Shades
+    public function createShades(bool $setCustomBaseColorAsShade500 = false): Shades
     {
         $closestGoldenPalette = $this->getClosestGoldenPalette();
-        return $closestGoldenPalette->createCustomShades($this);
+        return $closestGoldenPalette->createCustomShades($this, $setCustomBaseColorAsShade500);
     }
 
     /**

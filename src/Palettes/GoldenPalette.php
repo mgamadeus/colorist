@@ -4,6 +4,7 @@ declare (strict_types=1);
 
 namespace Colorist\Palettes;
 
+use Colorist\ColorSpaces\HslColor;
 use Colorist\ColorSpaces\LabColor;
 use Colorist\ColorSpaces\LchColor;
 
@@ -356,16 +357,77 @@ class GoldenPalette
      * applying specific lightness and chroma adjustments.
      *
      * @param LchColor $customBaseColor The base color to adjust the palette around.
+     * @param bool $setCustomBaseColorAsShade500 If true, the custom base color will be set as the shade 500 color, even if it is dark
      * @return Shades An array of adjusted LchColor objects forming the custom palette.
      */
-    public function createCustomShades(LchColor $customBaseColor): Shades
+    public function createCustomShades(LchColor $customBaseColor, bool $setCustomBaseColorAsShade500 = false): Shades
     {
-        $customBaseColorLab = $customBaseColor->toLabColor();
-        $maxLightness = 100.0;
+        // Find the closest color in the existing palette to the custom base color
         $closestGoldenPaletteColor = $this->getClosestColor($customBaseColor);
         $closestColorIndex = array_search($closestGoldenPaletteColor, $this->colors);
+
+        $shades = new Shades();
+
+        // Preprocess: Adjust the colors in the palette if the custom base color should be shade 500
+        // and if the closest color is not already at index 5
+        if ($setCustomBaseColorAsShade500 && $closestColorIndex !== 5) {
+            /** @var LchColor[] $adjustedColors */
+            $adjustedColors = [];
+            $deltaColor = null;
+
+            // Iterate through each index in the palette (0 to 9)
+            for($i = 0; $i <= 9; $i++) {
+                $currentColor = null;
+
+                // Handle the first color (index 0)
+                if ($i == 0) {
+                    $currentColor = $this->colors[0];
+                }
+                // Set the custom base color at the middle (index 5)
+                elseif ($i == 5) {
+                    $currentColor = $customBaseColor;
+                }
+                // Handle colors before the middle (indexes 1 to 4)
+                elseif ($i <= 4) {
+                    $currentIndex = $closestColorIndex / 5 * $i;
+                    // Interpolate between two colors to find the appropriate color for the current index
+                    $previousColor = $this->colors[floor($currentIndex)];
+                    $nextColor = $this->colors[ceil($currentIndex)];
+                    $currentColor = $previousColor->blendColor($nextColor, $currentIndex - floor($currentIndex));
+                }
+                // Handle colors after the middle (indexes 6 to 9)
+                elseif ($i >= 6) {
+                    $deltaIndex = $i - 5;
+                    // Find the opposite light color for symmetry
+                    $oppositeLightColor = $this->colors[5 - $deltaIndex];
+
+                    // Convert both the custom base color and the opposite light color to HSL for easier manipulation
+                    $customBaseColorHsl = $customBaseColor->toLabColor()->toXyzColor()->toRgbColor()->toHslColor();
+                    $oppositeLightColorHsl = $oppositeLightColor->toLabColor()->toXyzColor()->toRgbColor()->toHslColor();
+
+                    // Calculate the factor by which lightness should be adjusted
+                    $lightnessFactor = $customBaseColorHsl->getLightness() / $oppositeLightColorHsl->getLightness();
+
+                    /** @var HslColor $newColor */
+                    $newColor = clone $customBaseColorHsl;
+                    // Adjust the lightness of the new color based on the calculated factor
+                    $newColor->setLightness($newColor->getLightness() * $lightnessFactor);
+                    // Convert back to LCH color space for the final color
+                    $currentColor = $newColor->toRgbColor()->toLchColor();
+                }
+
+                // Add the adjusted color to the new palette
+                $adjustedColors[] = $currentColor;
+            }
+
+            // Replace the original colors with the adjusted colors
+            $this->colors = $adjustedColors;
+        }
+
+        // Main algorithm
+        $customBaseColorLab = $customBaseColor->toLabColor();
+        $maxLightness = 100.0;
         $colorDifference = $closestGoldenPaletteColor->subtract($customBaseColor);
-        //$colorDifference = $customBaseColor->subtract($closestGoldenPaletteColor);
 
         $shades = new Shades();
         foreach ($this->colors as $index => $goldenPaletteColor) {
@@ -373,31 +435,28 @@ class GoldenPalette
                 $adjustedBaseColor = $customBaseColor;
             } else {
                 // Calculate color difference and base for adjustment
-                $deltaColor = $goldenPaletteColor->subtract($colorDifference);
-                $adjustedBaseColor = clone $goldenPaletteColor;//$goldenPaletteColor->subtract($colorDifference);
+                $adjustedBaseColor = $goldenPaletteColor->subtract($colorDifference);
 
                 // Lightness adjustment
-                //a.b - Cb[e] / Cb[c] * ( e.b - o.b);
                 $lightnessAdjustmentFactor = self::LIGHTNESS_FACTORS[$index] / self::LIGHTNESS_FACTORS[$closestColorIndex];
-                $adjustedLightness = $goldenPaletteColor->getLightness(
-                    ) - $lightnessAdjustmentFactor * $colorDifference->getLightness();
+                $adjustedLightness = $goldenPaletteColor->getLightness() - $lightnessAdjustmentFactor * $colorDifference->getLightness();
                 $adjustedLightness = max(0.0, min($maxLightness, $adjustedLightness));
                 $adjustedBaseColor = $adjustedBaseColor->adjustLightness(fn($lightness) => $adjustedLightness);
 
-                // Chroma adjustment, incorporating conditional logic for low chroma
+                // Chroma adjustment
                 $chromaAdjustmentFactor = $this->hasMainColorLowChroma() ? 1.0 : min(
                     1.25,
                     self::CHROMA_FACTORS[$index] / self::CHROMA_FACTORS[$closestColorIndex]
                 );
-                $adjustedChroma = $goldenPaletteColor->getChroma(
-                    ) - $chromaAdjustmentFactor * $colorDifference->getChroma();
+                $adjustedChroma = $goldenPaletteColor->getChroma() - $chromaAdjustmentFactor * $colorDifference->getChroma();
                 $adjustedChroma = max(0.0, $adjustedChroma);
                 $adjustedBaseColor = $adjustedBaseColor->adjustChroma(fn($chroma) => $adjustedChroma);
 
-                // Hue adjustment, ensuring it wraps correctly
-                $adjustedHue = fmod($goldenPaletteColor->getHue() - $colorDifference->getHue() + 360.0,360.0);
+                // Hue adjustment
+                $adjustedHue = fmod($goldenPaletteColor->getHue() - $colorDifference->getHue() + 360.0, 360.0);
                 $adjustedBaseColor = $adjustedBaseColor->adjustHue(fn($hue) => $adjustedHue);
             }
+
             // Coerce lightness within the new maximum lightness limit
             $maxLightness = max(0.0, $adjustedBaseColor->getLightness() - 1.7);
             $shades->addShade(new Shade($adjustedBaseColor->toLabColor()->toXyzColor()->toRgbColor(), Shades::DEFAULT_SHADES[$index]));

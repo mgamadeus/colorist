@@ -140,12 +140,12 @@ class RgbColor
 
     /**
      * Converts the RGB color of an object to LCH color and creates custom shades based on the LCH color.
-     *
+     * @param bool $setCustomBaseColorAsShade500 If true, the custom base color will be set as the shade 500 color, even if it is dark
      * @return Shades The custom shades created based on the LCH color of the RGB color.
      */
-    public function createShades(): Shades
+    public function createShades(bool $setCustomBaseColorAsShade500 = false): Shades
     {
-        return $this->toLchColor()->createShades();
+        return $this->toLchColor()->createShades($setCustomBaseColorAsShade500);
     }
 
     /**

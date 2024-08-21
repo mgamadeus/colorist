@@ -47,9 +47,24 @@ class HslColor
         return $this->lightness;
     }
 
-    public function getAlpha(): float
+    public function setHue(float $hue): void
     {
-        return $this->alpha;
+        $this->hue = $hue;
+    }
+
+    public function setSaturation(float $saturation): void
+    {
+        $this->saturation = $saturation;
+    }
+
+    public function setLightness(float $lightness): void
+    {
+        $this->lightness = $lightness;
+    }
+
+    public function setAlpha(float $alpha): void
+    {
+        $this->alpha = $alpha;
     }
 
     /**
@@ -76,13 +91,15 @@ class HslColor
                 if ($t < 2/3) return $p + ($q - $p) * (2/3 - $t) * 6;
                 return $p;
             };
+            // Normalize hue to [0, 1]
+            $hue = $this->hue / 360;
 
             $q = $this->lightness < 0.5 ? $this->lightness * (1 + $this->saturation) : $this->lightness + $this->saturation - $this->lightness * $this->saturation;
             $p = 2 * $this->lightness - $q;
 
-            $r = $functionHueToRgb($p, $q, $this->hue + 1/3);
-            $g = $functionHueToRgb($p, $q, $this->hue);
-            $b = $functionHueToRgb($p, $q, $this->hue - 1/3);
+            $r = $functionHueToRgb($p, $q, $hue + 1/3);
+            $g = $functionHueToRgb($p, $q, $hue);
+            $b = $functionHueToRgb($p, $q, $hue - 1/3);
         }
 
         // The RGB values are already in the correct 0-1 range
